@@ -1,12 +1,13 @@
 import PySimpleGUI as sg
 import os.path
+from VTKDraft import vtkDraft;
 
 # First the window layout in 2 columns
 
 titleFont = ("Arial", 15)
 
 def blank_frame():
-    return sg.Frame("", [[]], pad=(5, 3), expand_x=True, expand_y=True, background_color='#404040', border_width=0)
+    return sg.Frame("", [[sg.Image(key='-IMAGE-')]], pad=(5, 3), expand_x=True, expand_y=True, border_width=0)
 
 file_Title_Frame= [
     [
@@ -55,7 +56,7 @@ window = sg.Window("Point Cloud Data Viewer", layout, size=(1280, 720), element_
 
 while True:
     event, values = window.read()
-    
+    window['-IMAGE-'](data=vtkDraft())
     #Defining info button event
     if event == "Information":
         ch = sg.popup_ok_cancel("Rotate Object:\n\n" + "Please use CTRL + Mouse to rotate the object \n", "Zoom in/out Object:", "Please use CTRL + Mouse Roller to Zoom in/ out \n", title="Information", font=titleFont)
@@ -65,3 +66,4 @@ while True:
         break
 
 window.close()
+
