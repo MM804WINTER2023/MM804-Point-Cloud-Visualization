@@ -18,6 +18,10 @@ from vtkmodules.vtkRenderingCore import (
     vtkWindowToImageFilter
 )
 
+from enamlx.widgets.table_view import (
+    TableView, TableViewRow, TableViewItem
+)
+
 def main():
     clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH']
 
@@ -33,7 +37,7 @@ def main():
             d.append(root+'/'+clouds)
     for samples in d:
         #for clasesss in ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
-        for clasesss in ["LPS"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
+        for clasesss in ["MHE"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
             if clasesss in samples:
                 print(clasesss)
                 print('Processing')
@@ -135,11 +139,11 @@ def main():
     interactor.Start()
 
         # screenshot code:
-    w2if = vtkWindowToImageFilter()
-    w2if.SetInput(renderWindow)
-    w2if.SetInputBufferTypeToRGB()
-    w2if.ReadFrontBufferOff()
-    w2if.Update()
+    # w2if = vtkWindowToImageFilter()
+    # w2if.SetInput(renderWindow)
+    # w2if.SetInputBufferTypeToRGB()
+    # w2if.ReadFrontBufferOff()
+    # w2if.Update()
     #writer = vtkPNGWriter()
     #writer.SetFileName('TestScreenshot.png')
     #writer.SetInputConnection(w2if.GetOutputPort())

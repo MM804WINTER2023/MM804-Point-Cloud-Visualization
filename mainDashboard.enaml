@@ -5,59 +5,12 @@ from enaml.widgets.api import (
     MultilineField, PushButton, VTKCanvas, PopupView, Menu
 )
 
+
+from vtkDraft import vtkPCDLoader
+
 import vtk
 
-def create_renderer():
-    quadric = vtk.vtkQuadric()
-    quadric.SetCoefficients(.5, 1, .2, 0, .1, 0, 0, .2, 0, 0)
-
-    sample = vtk.vtkSampleFunction()
-    sample.SetSampleDimensions(50, 50, 50)
-    sample.SetImplicitFunction(quadric)
-
-    contours = vtk.vtkContourFilter()
-    contours.SetInputConnection(sample.GetOutputPort())
-    contours.GenerateValues(5, 0.0, 1.2)
-
-    contour_mapper = vtk.vtkPolyDataMapper()
-    contour_mapper.SetInputConnection(contours.GetOutputPort())
-    contour_mapper.SetScalarRange(0.0, 1.2)
-
-    contour_actor = vtk.vtkActor()
-    contour_actor.SetMapper(contour_mapper)
-
-    outline = vtk.vtkOutlineFilter()
-    outline.SetInputConnection(sample.GetOutputPort())
-
-    outline_mapper = vtk.vtkPolyDataMapper()
-    outline_mapper.SetInputConnection(outline.GetOutputPort())
-
-    outline_actor = vtk.vtkActor()
-    outline_actor.SetMapper(outline_mapper)
-    outline_actor.GetProperty().SetColor(0, 0, 0)
-
-    renderer = vtk.vtkRenderer()
-    renderer.AddActor(contour_actor)
-    renderer.AddActor(outline_actor)
-    renderer.SetBackground(.75, .75, .75)
-
-    camera = vtk.vtkCamera()
-    camera.SetPosition(0, 0, 5)
-    camera.SetFocalPoint(0, 0, 0)
-    renderer.SetActiveCamera(camera)
-
-    bounds = outline_actor.GetBounds()
-    # Calculate the center of the actor
-    center = [
-        (bounds[0] + bounds[1]) / 2,
-        (bounds[2] + bounds[3]) / 2,
-        (bounds[4] + bounds[5]) / 2,
-    ]
-
-    # Set the camera's focal point to the center of the actor
-    camera.SetFocalPoint(center)
-
-    return renderer
+path='/Users/millerma/Library/CloudStorage/OneDrive-Personal/Courses/MM 804/Project/VTK Visualization/MM804-Point-Cloud-Visualization/Dataset/assets/hydro.tel'
 
 enamldef PopupMenu(Menu):
     GroupBox: grpBoxInformation:
@@ -130,15 +83,18 @@ enamldef Main(Window):
         GroupBox: grpBoxOverview:
             title << "360 View" 
             VTKCanvas:
-                renderer = create_renderer()
+                renderers = vtkPCDLoader(path)
+                renderer = renderers[0]
         GroupBox: grpBoxSide:
             title << "Side View" 
             VTKCanvas:
-                renderer = create_renderer()
+                renderers = vtkPCDLoader(path)
+                renderer = renderers[1]
         GroupBox: grpBoxTop:
             title << "Top View" 
             VTKCanvas:
-                renderer = create_renderer()
+                renderers = vtkPCDLoader(path)
+                renderer = renderers[2]
         GroupBox: grpBoxList:
             title << "Object List" 
 

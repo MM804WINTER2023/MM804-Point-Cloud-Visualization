@@ -45,7 +45,7 @@ data_model = TableModel(people=[
     for i in range(11)
 ])
 
-enamldef Main(Window):
+enamldef TableView(Window):
     attr model = data_model
     Container:
         Label:

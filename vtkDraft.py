@@ -1,45 +1,131 @@
 import vtk
+import open3d as o3d
+import numpy as np
+import numpy as np
+import open3d as o3d
+from vtkmodules.vtkIOImage import vtkPNGWriter
+import os
+import random
+from vtkmodules.vtkRenderingCore import (
+    vtkActor,
+    vtkPolyDataMapper,
+    vtkRenderWindow,
+    vtkRenderWindowInteractor,
+    vtkRenderer,
+    vtkWindowToImageFilter
+)
 
-# Create a reader for the PLY file
-reader = vtk.vtkPLYReader()
-reader.SetFileName("SZ_002-NW.ply")
-reader.Update()
+def vtkPCDLoader(path):
+    clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH']
 
-# Create a mapper
-mapper = vtk.vtkPolyDataMapper()
-mapper.SetInputConnection(reader.GetOutputPort())
+    #path='/home/glugo/project/data/scenes/NW/objects/assets/'# ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]:
+    
+    #pcd = o3d.io.read_point_cloud("/home/glugo/project/data/scenes/MW/objects/assets/sto.san.water.misc/MHD/MHD156-MW.pcd")
 
-# Create an actor and set its mapper
-actor = vtk.vtkActor()
-actor.SetMapper(mapper)
+    d=[]
+    sourceObjects = list()
+    sourceObjects2 = list()
+    for root, dirs, filenames in os.walk(path):
+        for clouds in filenames:
+            d.append(root+'/'+clouds)
+    for samples in d:
+        #for clasesss in ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
+        for clasesss in ["MHE"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
+            if clasesss in samples:
+                print(clasesss)
+                print('Processing')
+                pcd = o3d.io.read_point_cloud(samples)
+                p = np.asarray(pcd.points)
+                points = vtk.vtkPoints()
+                vertices = vtk.vtkCellArray()
+                for i in range(len(p)):
+                    point_id = points.InsertNextPoint(p[i])
+                    vertices.InsertNextCell(1)
+                    vertices.InsertCellPoint(point_id)   
+                sourceObjects.append(vtk.vtkPolyData())
+                sourceObjects[-1].SetPoints(points)
+                sourceObjects[-1].SetVerts(vertices)
+                sourceObjects2.append(clasesss)
+                break
+            break
+    np.random.shuffle(sourceObjects)
+    colors = vtk.vtkNamedColors()
 
-# Set the color of the actor to white
-actor.GetProperty().SetColor(1.0, 1.0, 1.0)
+    # Set the background color.
+    colors.SetColor('BkgColor', [0, 0, 0, 255])
+    renderers = list()
+    mappers = list()
+    actors = list()
+    textmappers = list()
+    textactors = list()
 
-# Create a renderer and add the actor to it
-renderer = vtk.vtkRenderer()
-renderer.AddActor(actor)
+    # Create one text property for all.
+    textProperty = vtk.vtkTextProperty()
+    textProperty.SetFontSize(8)
+    textProperty.SetJustificationToCentered()
+    textProperty.SetColor(colors.GetColor3d('LightGoldenrodYellow'))
 
-# Set up a basic light
-light = vtk.vtkLight()
-light.SetFocalPoint(renderer.GetActiveCamera().GetFocalPoint())
-light.SetPosition(renderer.GetActiveCamera().GetPosition())
-renderer.AddLight(light)
+    backProperty = vtk.vtkProperty()
+    backProperty.SetColor(colors.GetColor3d('Tomato'))
 
-# Create a render window and set its size
-render_window = vtk.vtkRenderWindow()
-render_window.SetSize(800, 600)
-renderer.SetBackground(1.0, 1.0, 1.0)
+    # Create a source, renderer, mapper, and actor
+    # for each object.
+    for i in range(0, len(sourceObjects)):
+        mappers.append(vtk.vtkPolyDataMapper())
+        mappers[i].SetInputData(sourceObjects[i])
 
-# Add the renderer to the render window
-render_window.AddRenderer(renderer)
+        actors.append(vtk.vtkActor())
+        actors[i].SetMapper(mappers[i])
+        actors[i].GetProperty().SetOpacity(0.8)
+        actors[i].GetProperty().SetColor(colors.GetColor3d('DarkGrey'))
+        actors[i].SetBackfaceProperty(backProperty)
+        actors[i].GetProperty().SetPointSize(1.0)
 
-# Create an interactor and set it up with the render window
-interactor = vtk.vtkRenderWindowInteractor()
-interactor.SetRenderWindow(render_window)
+        textmappers.append(vtk.vtkTextMapper())
+        #textmappers[i].SetInput(sourceObjects[i].GetClassName())
+        textmappers[i].SetInput(sourceObjects2[i])
+        textmappers[i].SetTextProperty(textProperty)
 
-# Initialize the interactor and start the rendering loop
-interactor.Initialize()
-render_window.Render()
-interactor.Start()
+        textactors.append(vtk.vtkActor2D())
+        textactors[i].SetMapper(textmappers[i])
+        textactors[i].SetPosition(120, 16)
+        renderers.append(vtk.vtkRenderer())
+
+    gridDimensions = 2
+
+    # We need a renderer even if there is no actor.
+    for i in range(len(sourceObjects), gridDimensions ** 2):
+        renderers.append(vtk.vtkRenderer())
+
+    # renderWindow = vtk.vtkRenderWindow()
+    # renderWindow.SetWindowName('SourceObjectsDemo')
+    rendererSize = 600
+    # renderWindow.SetSize(rendererSize * gridDimensions, rendererSize * gridDimensions)
+
+    for row in range(0, gridDimensions):
+        for col in range(0, gridDimensions):
+            index = row * gridDimensions + col
+            x0 = float(col) / gridDimensions
+            y0 = float(gridDimensions - row - 1) / gridDimensions
+            x1 = float(col + 1) / gridDimensions
+            y1 = float(gridDimensions - row) / gridDimensions
+            # renderWindow.AddRenderer(renderers[index])
+            # renderers[index].SetViewport(x0, y0, x1, y1)
+
+            if index > (len(sourceObjects) - 1):
+                continue
+
+            renderers[index].AddActor(actors[index])
+            renderers[index].AddActor(textactors[index])
+            renderers[index].SetBackground(colors.GetColor3d('White'))
+            renderers[index].ResetCamera()
+            # renderers[index].GetActiveCamera().Azimuth(-180)# FLAT 
+            # renderers[index].GetActiveCamera().Elevation(-00) # FLAT
+            # renderers[index].GetActiveCamera().Zoom(1.2)# FLAT
+            renderers[index].GetActiveCamera().Azimuth(180) 
+            renderers[index].GetActiveCamera().Elevation(100)
+            renderers[index].GetActiveCamera().Zoom(1.2)
+            renderers[index].ResetCameraClippingRange()
+
+    return renderers
 
