@@ -14,7 +14,7 @@ path='/Users/millerma/Library/CloudStorage/OneDrive-Personal/Courses/MM 804/Proj
 
 fileNumSelection = 0
 
-renderers = vtkPCDLoader(path, fileNumSelection)
+renderers, new_path = vtkPCDLoader(path, fileNumSelection)
 
 
 enamldef PopupMenu(Menu):
@@ -75,7 +75,7 @@ enamldef Main(Window):
         ]
         GroupBox: grpBoxTitle:
             Label: appTitle: 
-                text = 'Exploring the selected Annotated Object'
+                text = 'Exploring the selected Annotated Object: ' + new_path
         
         GroupBox: grpBoxBtnGrp:
             PushButton: information:
