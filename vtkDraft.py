@@ -23,15 +23,28 @@ def vtkPCDLoader(path, model_Num):
     #pcd = o3d.io.read_point_cloud("/home/glugo/project/data/scenes/MW/objects/assets/sto.san.water.misc/MHD/MHD156-MW.pcd")
 
     d=[]
+    clouds_object = []
     sourceObjects = list()
     sourceObjects2 = list()
     for root, dirs, filenames in os.walk(path):
         for clouds in filenames:
             d.append(root+'/'+clouds)
+            clouds_object.append(clouds)
+    new_path = ""   
     for samples in d:
         #for clasesss in ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
         for clasesss in ["MHE"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
             if clasesss in samples:
+                index = samples.find("MHE")
+                if index != -1:
+                    # Slice the string from the "MHE" index to the end of the path
+                    new_path = samples[index:]
+                else:
+                    # "MHE" is not in the path, so keep the original path
+                    new_path = samples
+
+                print (new_path)
+                
                 print(clasesss)
                 print('Processing')
                 pcd = o3d.io.read_point_cloud(samples)
@@ -49,7 +62,10 @@ def vtkPCDLoader(path, model_Num):
                 break
             break
     
-    print (sourceObjects)
+    # print (sourceObjects)
+    print ("&&&&&&&")
+    print (clouds_object)
+
 
     windowNum = 3
 
@@ -129,5 +145,5 @@ def vtkPCDLoader(path, model_Num):
         renderers[index].ResetCameraClippingRange()
 
 
-    return renderers
+    return renderers, new_path
 
