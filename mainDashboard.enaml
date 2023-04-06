@@ -12,6 +12,11 @@ import vtk
 
 path='/Users/millerma/Library/CloudStorage/OneDrive-Personal/Courses/MM 804/Project/VTK Visualization/MM804-Point-Cloud-Visualization/Dataset/assets/hydro.tel'
 
+fileNumSelection = 0
+
+renderers = vtkPCDLoader(path, fileNumSelection)
+
+
 enamldef PopupMenu(Menu):
     GroupBox: grpBoxInformation:
         GroupBox: grpBoxRotateInstrution:
@@ -29,6 +34,16 @@ enamldef PopupMenu(Menu):
                 text = 'Please use CTRL + Mouse Roller to Zoom in/ out'
                 align = 'center'
 
+enamldef SettingMenu(Menu):
+    GroupBox: grpBoxInformation:
+        GroupBox: grpBoxRotateInstrution:
+            Label:
+                text = 'Auto-Rotate the Object?'
+                align = 'left'
+            CheckBox:
+                text = 'Check for Auto-Rotation'
+                clicked :: print('Check One clicked')
+                
 
 enamldef Main(Window):
     title = "Point Cloud VTK Viewer"
@@ -69,8 +84,7 @@ enamldef Main(Window):
         GroupBox: grpBoxBtnGrp2:
             PushButton: settings:
                 text << 'Settings'
-                clicked ::
-                    pass
+                clicked :: SettingMenu().popup()
 
         GroupBox: grpBoxMedian:
             Label: appMedian: 
@@ -83,17 +97,14 @@ enamldef Main(Window):
         GroupBox: grpBoxOverview:
             title << "360 View" 
             VTKCanvas:
-                renderers = vtkPCDLoader(path)
                 renderer = renderers[0]
         GroupBox: grpBoxSide:
             title << "Side View" 
             VTKCanvas:
-                renderers = vtkPCDLoader(path)
                 renderer = renderers[1]
         GroupBox: grpBoxTop:
             title << "Top View" 
             VTKCanvas:
-                renderers = vtkPCDLoader(path)
                 renderer = renderers[2]
         GroupBox: grpBoxList:
             title << "Object List" 

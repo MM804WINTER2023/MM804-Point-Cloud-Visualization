@@ -133,6 +133,8 @@ def main():
             renderers[index].GetActiveCamera().Elevation(100)
             renderers[index].GetActiveCamera().Zoom(1.2)
             renderers[index].ResetCameraClippingRange()
+    
+
 
     interactor = vtk.vtkRenderWindowInteractor()
     interactor.SetRenderWindow(renderWindow)

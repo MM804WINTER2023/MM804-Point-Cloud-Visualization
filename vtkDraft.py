@@ -15,7 +15,7 @@ from vtkmodules.vtkRenderingCore import (
     vtkWindowToImageFilter
 )
 
-def vtkPCDLoader(path):
+def vtkPCDLoader(path, model_Num):
     clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH']
 
     #path='/home/glugo/project/data/scenes/NW/objects/assets/'# ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]:
@@ -48,7 +48,12 @@ def vtkPCDLoader(path):
                 sourceObjects2.append(clasesss)
                 break
             break
-    np.random.shuffle(sourceObjects)
+    
+    print (sourceObjects)
+
+    windowNum = 3
+
+    # np.random.shuffle(sourceObjects)
     colors = vtk.vtkNamedColors()
 
     # Set the background color.
@@ -68,11 +73,13 @@ def vtkPCDLoader(path):
     backProperty = vtk.vtkProperty()
     backProperty.SetColor(colors.GetColor3d('Tomato'))
 
+    targetObjects = sourceObjects[model_Num]
+    targetObjects2 = sourceObjects2[model_Num]
     # Create a source, renderer, mapper, and actor
     # for each object.
-    for i in range(0, len(sourceObjects)):
+    for i in range(0, windowNum):
         mappers.append(vtk.vtkPolyDataMapper())
-        mappers[i].SetInputData(sourceObjects[i])
+        mappers[i].SetInputData(targetObjects)
 
         actors.append(vtk.vtkActor())
         actors[i].SetMapper(mappers[i])
@@ -83,49 +90,44 @@ def vtkPCDLoader(path):
 
         textmappers.append(vtk.vtkTextMapper())
         #textmappers[i].SetInput(sourceObjects[i].GetClassName())
-        textmappers[i].SetInput(sourceObjects2[i])
+        textmappers[i].SetInput(targetObjects2)
         textmappers[i].SetTextProperty(textProperty)
 
         textactors.append(vtk.vtkActor2D())
         textactors[i].SetMapper(textmappers[i])
         textactors[i].SetPosition(120, 16)
         renderers.append(vtk.vtkRenderer())
-
+    
     gridDimensions = 2
 
     # We need a renderer even if there is no actor.
     for i in range(len(sourceObjects), gridDimensions ** 2):
         renderers.append(vtk.vtkRenderer())
 
-    # renderWindow = vtk.vtkRenderWindow()
-    # renderWindow.SetWindowName('SourceObjectsDemo')
-    rendererSize = 600
-    # renderWindow.SetSize(rendererSize * gridDimensions, rendererSize * gridDimensions)
+    print (renderers)
 
-    for row in range(0, gridDimensions):
-        for col in range(0, gridDimensions):
-            index = row * gridDimensions + col
-            x0 = float(col) / gridDimensions
-            y0 = float(gridDimensions - row - 1) / gridDimensions
-            x1 = float(col + 1) / gridDimensions
-            y1 = float(gridDimensions - row) / gridDimensions
-            # renderWindow.AddRenderer(renderers[index])
-            # renderers[index].SetViewport(x0, y0, x1, y1)
+    for index in range(0, windowNum):
+        renderers[index].AddActor(actors[index])
+        renderers[index].AddActor(textactors[index])
+        renderers[index].SetBackground(colors.GetColor3d('White'))
+        renderers[index].ResetCamera()
 
-            if index > (len(sourceObjects) - 1):
-                continue
 
-            renderers[index].AddActor(actors[index])
-            renderers[index].AddActor(textactors[index])
-            renderers[index].SetBackground(colors.GetColor3d('White'))
-            renderers[index].ResetCamera()
-            # renderers[index].GetActiveCamera().Azimuth(-180)# FLAT 
-            # renderers[index].GetActiveCamera().Elevation(-00) # FLAT
-            # renderers[index].GetActiveCamera().Zoom(1.2)# FLAT
-            renderers[index].GetActiveCamera().Azimuth(180) 
+        if index == 0:
+            renderers[index].GetActiveCamera().Azimuth(60)# Vertical
+            renderers[index].GetActiveCamera().Elevation(100) # Vertical
+            renderers[index].GetActiveCamera().Zoom(1.2)# Vertical
+        elif index == 1:
+            renderers[index].GetActiveCamera().Azimuth(180) # FLAT
             renderers[index].GetActiveCamera().Elevation(100)
             renderers[index].GetActiveCamera().Zoom(1.2)
-            renderers[index].ResetCameraClippingRange()
+        elif index == 2:
+            renderers[index].GetActiveCamera().Azimuth(-180) # 60 angle view
+            renderers[index].GetActiveCamera().Elevation(-00)
+            renderers[index].GetActiveCamera().Zoom(1.2)
+
+        renderers[index].ResetCameraClippingRange()
+
 
     return renderers
 
