@@ -15,6 +15,7 @@ from vtkmodules.vtkRenderingCore import (
     vtkWindowToImageFilter
 )
 
+
 def vtkPCDLoader(path, model_Num):
     clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH']
 
@@ -61,11 +62,8 @@ def vtkPCDLoader(path, model_Num):
                 sourceObjects2.append(clasesss)
                 break
             break
-    
-    # print (sourceObjects)
-    print ("&&&&&&&")
-    print (clouds_object)
 
+    numOfFiles = len(sourceObjects)
 
     windowNum = 3
 
@@ -91,6 +89,11 @@ def vtkPCDLoader(path, model_Num):
 
     targetObjects = sourceObjects[model_Num]
     targetObjects2 = sourceObjects2[model_Num]
+
+    def SelectPolygons(widget, event_string):
+        boxRep.GetPlanes(planes)
+        selectActor.VisibilityOn()
+
     # Create a source, renderer, mapper, and actor
     # for each object.
     for i in range(0, windowNum):
@@ -102,7 +105,31 @@ def vtkPCDLoader(path, model_Num):
         actors[i].GetProperty().SetOpacity(0.8)
         actors[i].GetProperty().SetColor(colors.GetColor3d('DarkGrey'))
         actors[i].SetBackfaceProperty(backProperty)
-        actors[i].GetProperty().SetPointSize(1.0)
+        actors[i].GetProperty().SetPointSize(1.0)      
+
+        # # Bounding Box
+        # planes = vtk.vtkPlanes()
+        # clipper = vtk.vtkClipPolyData()
+        # clipper.SetClipFunction(planes)
+        # clipper.InsideOutOn()
+        # selectMapper = vtk.vtkPolyDataMapper()
+        # selectMapper.SetInputConnection(clipper.GetOutputPort())
+        # selectActor = vtk.vtkLODActor()
+        # selectActor.SetMapper(selectMapper)
+        # selectActor.GetProperty().SetColor(0, 1, 0)
+        # selectActor.VisibilityOff()
+        # selectActor.SetScale(1.01, 1.01, 1.01)
+
+        # boxRep = vtk.vtkBoxRepresentation()
+        # boxRep.SetPlaceFactor(0.75)
+        # # boxRep.PlaceWidget(sphere.GetOutput().GetBounds())
+        # boxWidget = vtk.vtkBoxWidget2()
+        # # boxWidget.SetInteractor(iRen)
+        # boxWidget.SetRepresentation(boxRep)
+        # boxWidget.AddObserver("EndInteractionEvent", SelectPolygons)
+        # boxWidget.SetPriority(1)
+        
+        #  # Bounding Box
 
         textmappers.append(vtk.vtkTextMapper())
         #textmappers[i].SetInput(sourceObjects[i].GetClassName())
@@ -116,17 +143,36 @@ def vtkPCDLoader(path, model_Num):
     
     gridDimensions = 2
 
+
+
     # We need a renderer even if there is no actor.
     for i in range(len(sourceObjects), gridDimensions ** 2):
         renderers.append(vtk.vtkRenderer())
+        
 
     print (renderers)
+
 
     for index in range(0, windowNum):
         renderers[index].AddActor(actors[index])
         renderers[index].AddActor(textactors[index])
         renderers[index].SetBackground(colors.GetColor3d('White'))
         renderers[index].ResetCamera()
+
+        # # rough Bounding Box
+        # outline = vtk.vtkOutlineFilter()
+        # print("*******")
+        # print (type(targetObjects))
+        # outline.SetInputConnection(targetObjects.GetOutputPort())
+
+        # outlineMapper = vtkPolyDataMapper()
+        # outlineMapper.SetInputConnection(outline.GetOutputPort())
+
+        # outlineActor = vtkActor()
+        # outlineActor.SetMapper(outlineMapper)
+        # outlineActor.GetProperty().SetColor(0,1,1)
+
+        # renderers[index].AddActor(outlineActor)
 
 
         if index == 0:
@@ -141,9 +187,8 @@ def vtkPCDLoader(path, model_Num):
             renderers[index].GetActiveCamera().Azimuth(-180) # 60 angle view
             renderers[index].GetActiveCamera().Elevation(-00)
             renderers[index].GetActiveCamera().Zoom(1.2)
-
         renderers[index].ResetCameraClippingRange()
 
 
-    return renderers, new_path
+    return renderers, new_path, numOfFiles
 
