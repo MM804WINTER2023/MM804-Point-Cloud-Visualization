@@ -2,19 +2,26 @@ from __future__ import print_function
 from enaml.layout.api import vbox, hbox, spacer, align
 from enaml.widgets.api import (
     Window, Container, GroupBox, Form, Label, Field, CheckBox, ComboBox,
-    MultilineField, PushButton, VTKCanvas, PopupView, Menu
+    MultilineField, PushButton, VTKCanvas, PopupView, Menu, FileDialogEx
 )
+import os
+import sys
 
 
 from vtkDraft import vtkPCDLoader
 
 import vtk
 
+from boxWidget import testBox
+
 path='/Users/millerma/Library/CloudStorage/OneDrive-Personal/Courses/MM 804/Project/VTK Visualization/MM804-Point-Cloud-Visualization/Dataset/assets/hydro.tel'
 
 fileNumSelection = 0
+centorid = (0, 0, 0)
+median = (0, 0, 0)
 
-renderers, new_path = vtkPCDLoader(path, fileNumSelection)
+renderers, new_path, numOfFiles = vtkPCDLoader(path, fileNumSelection)
+
 
 
 enamldef PopupMenu(Menu):
@@ -88,11 +95,11 @@ enamldef Main(Window):
 
         GroupBox: grpBoxMedian:
             Label: appMedian: 
-                text = 'Annotated Object Central Median: '
+                text = 'Annotated Object Central Median: ' + str(centorid)
         
         GroupBox: grpBoxAvg:
             Label: appAvg: 
-                text = 'Annotated Object Central Average: '
+                text = 'Annotated Object Central Average: ' + str(median)
 
         GroupBox: grpBoxOverview:
             title << "360 View" 
@@ -108,17 +115,20 @@ enamldef Main(Window):
                 renderer = renderers[2]
         GroupBox: grpBoxList:
             title << "Object List" 
+            
 
         GroupBox: btmGrpBoxBtnGrp:
             PushButton: previous:
                 text << 'Previous Object'
-                clicked ::
-                    pass
+                clicked :: 
+                    if fileNumSelection >= 1 and fileNumSelection < numOfFiles-1:
+                        fileNumSelection = fileNumSelection - 1
         GroupBox: btmGrpBoxBtnGrp2:
             PushButton: next:
                 text << 'Next Object'
                 clicked ::
-                    pass
+                    if fileNumSelection > 0 and fileNumSelection <= numOfFiles-2:
+                        fileNumSelection = fileNumSelection + 1
 
 
         
