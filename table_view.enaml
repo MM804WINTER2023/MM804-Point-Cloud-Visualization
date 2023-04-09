@@ -1,6 +1,7 @@
 import os
 import time
 import random
+import datetime
 from threading import Thread
 from ipywidgets import Button
 from atom.api import (Atom, Str, Range, ContainerList, Bool)
@@ -20,74 +21,84 @@ from enaml.widgets.menu import Menu
 from enaml.widgets.action import Action
 from enamlx.core.looper import ListLooper
 
-class Person(Atom):
-    last_name = Str()
+count = 0 
 
-    first_name = Str()
+class PcdFile(Atom):
+    date = Str()
 
-    age = Range(low=0)
-
-    coordinates = Str()
+    dateSet = Str()
 
     debug = Bool(False)
 
     def __repr__(self, *args, **kwargs):
-        return "Person(first_name={p.first_name},last_name={p.last_name})".format(p=self)
+        return "PcdFile(dateSet={p.dateSet},date={p.date})".format(p=self)
+
+def readFiles():
+    defaultPath = "./Dataset/assets/hydro.tel"
+    files = os.listdir(defaultPath)
+    #file_info = {}
+    pcdList = []
+    global count
+    for file in files:
+        print (file)
+        file_path = os.path.join(defaultPath, file)
+        name = file
+        date = os.path.getmtime(file_path)
+        mod_time_str = datetime.datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
+        #file_info[name] = mod_time_str
+        newPcd = PcdFile(date = mod_time_str, dateSet = name)
+        pcdList.append (newPcd)
+        count += 1
+        
+    return pcdList
 
 class TableModel(Atom):
-    people = ContainerList(Person)
+    files = ContainerList(PcdFile)
 
-data_model = TableModel(people=[
-    Person( 
-            last_name='May 26,2019',
-           first_name='Dataset%i'%i,
-           age=i,
-           coordinates="(%d, %d)" % (i*10, i*20)
-           )
-           
-           
-    for i in range(11)
-])
+data_model = TableModel(files=
+    readFiles()
+)
+
+
+
+
 
 enamldef TableStart(Window):
     attr model = data_model
     Container:
         Label:
-            text = "Annotated Object List"
+            text = "Welcome to VTK Point Cloud Viewer, Please choose your PCD object from List below"
             font = {'size': 24, 'weight': 'bold'}
+            align =  'center'
 
         TableView: table:
             minimum_size = (750,420)
-            horizontal_headers << ['Annotated Object','Dataset','Date','Coordinates','Explore Dataset']
+            horizontal_headers << ['Annotated Object','Dataset','Date','Explore Dataset']
             horizontal_stretch = True
-            items << model.people
+            items << model.files
 
             Looper:
-                iterable << range(11)  # update to show 10 rows
+                iterable << range(count)  # update to show 10 rows
                 TableViewRow:
                     row << table.visible_row+loop_index
-                    attr person << table.items[self.row]
+                    attr pcdFile << table.items[self.row]
 
                     Menu:
                         Action:
                             text << 'Row {} menu'.format(table.visible_row+loop_index)
 
                     TableViewItem:
-                        text := person.first_name
+                        text := pcdFile.dateSet
                         selectable = False
 
                     TableViewItem:
-                        text := person.first_name
+                        text := pcdFile.dateSet
                         selectable = False
                         Menu:
                             Action:
-                                text << 'Edit {} menu'.format(person.first_name)
+                                text << 'Edit {} menu'.format(pcdFile.dateSet)
                     TableViewItem:
-                        text << person.last_name
-                        selectable = False
-                    TableViewItem:
-                        text = '(10,20)'
-                        editable = True
+                        text << pcdFile.date
                         selectable = False
                     TableViewItem:
                         PushButton:
