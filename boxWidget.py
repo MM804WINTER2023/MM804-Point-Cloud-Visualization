@@ -1,20 +1,20 @@
 import vtk
 
-sphere = vtk.vtkSphereSource()
-sphere.SetThetaResolution(30)
-sphere.SetPhiResolution(30)
+# sphere = vtk.vtkSphereSource()
+# sphere.SetThetaResolution(30)
+# sphere.SetPhiResolution(30)
 
 def testBox():
 
     mapper = vtk.vtkPolyDataMapper()
-    mapper.SetInputConnection(sphere.GetOutputPort())
+    # mapper.SetInputConnection(sphere.GetOutputPort())
     actor = vtk.vtkLODActor()
     actor.SetMapper(mapper)
     actor.VisibilityOn()
 
     planes = vtk.vtkPlanes()
     clipper = vtk.vtkClipPolyData()
-    clipper.SetInputConnection(sphere.GetOutputPort())
+    # clipper.SetInputConnection(sphere.GetOutputPort())
     clipper.SetClipFunction(planes)
     clipper.InsideOutOn()
     selectMapper = vtk.vtkPolyDataMapper()
@@ -45,7 +45,7 @@ def testBox():
 
     boxRep = vtk.vtkBoxRepresentation()
     boxRep.SetPlaceFactor(0.75)
-    boxRep.PlaceWidget(sphere.GetOutput().GetBounds())
+    # boxRep.PlaceWidget(sphere.GetOutput().GetBounds())
     boxWidget = vtk.vtkBoxWidget2()
     boxWidget.SetInteractor(iRen)
     boxWidget.SetRepresentation(boxRep)

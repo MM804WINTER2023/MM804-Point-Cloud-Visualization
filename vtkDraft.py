@@ -129,7 +129,7 @@ def vtkPCDLoader(path, model_Num):
         # boxWidget.AddObserver("EndInteractionEvent", SelectPolygons)
         # boxWidget.SetPriority(1)
         
-        #  # Bounding Box
+         # Bounding Box
 
         textmappers.append(vtk.vtkTextMapper())
         #textmappers[i].SetInput(sourceObjects[i].GetClassName())
