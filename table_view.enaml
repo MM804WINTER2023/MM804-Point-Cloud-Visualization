@@ -21,12 +21,16 @@ from enaml.widgets.menu import Menu
 from enaml.widgets.action import Action
 from enamlx.core.looper import ListLooper
 
+import enaml
+
 count = 0 
 
 class PcdFile(Atom):
     date = Str()
 
     dateSet = Str()
+
+    file_path = Str()
 
     debug = Bool(False)
 
@@ -46,7 +50,7 @@ def readFiles():
         date = os.path.getmtime(file_path)
         mod_time_str = datetime.datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
         #file_info[name] = mod_time_str
-        newPcd = PcdFile(date = mod_time_str, dateSet = name)
+        newPcd = PcdFile(date = mod_time_str, dateSet = name, file_path = file_path)
         pcdList.append (newPcd)
         count += 1
         
@@ -58,6 +62,13 @@ class TableModel(Atom):
 data_model = TableModel(files=
     readFiles()
 )
+
+def open_new_window(path):
+    with enaml.imports():
+        from mainDashboard import Main
+    print (path)
+    window = Main()
+    window.show()
 
 
 
@@ -72,7 +83,7 @@ enamldef TableStart(Window):
             align =  'center'
 
         TableView: table:
-            minimum_size = (750,420)
+            minimum_size = (800,420)
             horizontal_headers << ['Annotated Object','Dataset','Date','Explore Dataset']
             horizontal_stretch = True
             items << model.files
@@ -92,7 +103,7 @@ enamldef TableStart(Window):
                         selectable = False
 
                     TableViewItem:
-                        text := pcdFile.dateSet
+                        text := pcdFile.file_path
                         selectable = False
                         Menu:
                             Action:
@@ -103,3 +114,4 @@ enamldef TableStart(Window):
                     TableViewItem:
                         PushButton:
                             text << 'Explore'
+                            clicked :: open_new_window(pcdFile.file_path)
