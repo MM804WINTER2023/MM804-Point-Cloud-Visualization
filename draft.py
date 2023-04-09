@@ -6,17 +6,19 @@ from enaml.qt.qt_application import QtApplication
 import enamlx
 
 
-def runTable():
+def main():
     enamlx.install()
 
     faulthandler.enable()
     with enaml.imports():
-        from table_view import TableView
+        from table_view import TableStart
 
     app = QtApplication()
-    view = TableView()
+    view = TableStart()
     view.show()
 
     app.start()
 
 
+if __name__ == "__main__":
+    main()
