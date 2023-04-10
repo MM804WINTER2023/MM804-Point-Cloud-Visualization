@@ -24,6 +24,8 @@ from enamlx.core.looper import ListLooper
 import enaml
 
 count = 0 
+inputPath = ""
+itemNames = ""
 
 class PcdFile(Atom):
     date = Str()
@@ -63,10 +65,12 @@ data_model = TableModel(files=
     readFiles()
 )
 
-def open_new_window(path):
+def open_new_window(newPath, itemNewNames):
+    global inputPath, itemNames
+    inputPath = newPath
+    itemNames = itemNewNames
     with enaml.imports():
         from mainDashboard import Main
-    print (path)
     window = Main()
     window.show()
 
@@ -114,4 +118,4 @@ enamldef TableStart(Window):
                     TableViewItem:
                         PushButton:
                             text << 'Explore'
-                            clicked :: open_new_window(pcdFile.file_path)
+                            clicked :: open_new_window(pcdFile.file_path, pcdFile.dateSet)

@@ -16,8 +16,8 @@ from vtkmodules.vtkRenderingCore import (
 )
 
 
-def vtkPCDLoader(path, model_Num):
-    clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH']
+def vtkPCDLoader(path, model_Num, itemName):
+    clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH', 'ANC']
 
     #path='/home/glugo/project/data/scenes/NW/objects/assets/'# ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]:
     
@@ -34,8 +34,16 @@ def vtkPCDLoader(path, model_Num):
     new_path = ""   
     for samples in d:
         #for clasesss in ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
-        for clasesss in ["MHE"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
+        
+        item = itemName
+
+        for clasesss in [item]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
+            print ("clasesss is: ", clasesss)
+            print ("#####")
             if clasesss in samples:
+                print ("#####")
+                print (clasesss)
+                print ("#####")
                 index = samples.find("MHE")
                 if index != -1:
                     # Slice the string from the "MHE" index to the end of the path
@@ -86,7 +94,6 @@ def vtkPCDLoader(path, model_Num):
 
     backProperty = vtk.vtkProperty()
     backProperty.SetColor(colors.GetColor3d('Tomato'))
-
     targetObjects = sourceObjects[model_Num]
     targetObjects2 = sourceObjects2[model_Num]
 
@@ -139,6 +146,7 @@ def vtkPCDLoader(path, model_Num):
         textactors.append(vtk.vtkActor2D())
         textactors[i].SetMapper(textmappers[i])
         textactors[i].SetPosition(120, 16)
+
         renderers.append(vtk.vtkRenderer())
     
     gridDimensions = 2
@@ -179,6 +187,8 @@ def vtkPCDLoader(path, model_Num):
             renderers[index].GetActiveCamera().Azimuth(60)# Vertical
             renderers[index].GetActiveCamera().Elevation(100) # Vertical
             renderers[index].GetActiveCamera().Zoom(1.2)# Vertical
+            position = renderers[index].GetActiveCamera().GetPosition()
+            print("Camera position:", position)
         elif index == 1:
             renderers[index].GetActiveCamera().Azimuth(180) # FLAT
             renderers[index].GetActiveCamera().Elevation(100)

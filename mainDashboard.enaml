@@ -6,6 +6,7 @@ from enaml.widgets.api import (
 )
 import os
 import sys
+from table_view import inputPath, itemNames
 
 
 from vtkDraft import vtkPCDLoader
@@ -14,13 +15,14 @@ import vtk
 
 from boxWidget import testBox
 
-path='/Users/millerma/Library/CloudStorage/OneDrive-Personal/Courses/MM 804/Project/VTK Visualization/MM804-Point-Cloud-Visualization/Dataset/assets/hydro.tel'
+path=inputPath
+
 
 fileNumSelection = 0
 centorid = (0, 0, 0)
 median = (0, 0, 0)
 
-renderers, new_path, numOfFiles = vtkPCDLoader(path, fileNumSelection)
+renderers, new_path, numOfFiles = vtkPCDLoader(path, fileNumSelection, itemNames)
 
 
 
@@ -31,14 +33,14 @@ enamldef PopupMenu(Menu):
                 text = 'Rotate Object'
                 align = 'left'
             Label:
-                text = 'Please use CTRL + Mouse to rotate the object'
+                text = 'Please hold Mouse to rotate the object'
                 align = 'center'
         GroupBox: grpBoxZoomInstrution:
             Label:
                 text = 'Zoom in/out Object'
                 align = 'left'
             Label:
-                text = 'Please use CTRL + Mouse Roller to Zoom in/ out'
+                text = 'Please use Mouse Roller to Zoom in/ out'
                 align = 'center'
 
 enamldef SettingMenu(Menu):
@@ -53,31 +55,32 @@ enamldef SettingMenu(Menu):
                 
 
 enamldef Main(Window):
+    
     title = "Point Cloud VTK Viewer"
     attr mdi_visible = True
     Container:
         constraints = [
             # Set the constraint width for the four window views
-            grpBoxOverview.width == 0.49 * width,
-            grpBoxTop.width == 0.49 * width,
-            grpBoxMedian.width == grpBoxAvg.width,
+            grpBoxTitle.width == 900,
+            grpBoxTop.width == 0.488 * width,
+            #grpBoxMedian.width == grpBoxAvg.width,
             grpBoxBtnGrp.height == grpBoxTitle.height,
-            btmGrpBoxBtnGrp.width == btmGrpBoxBtnGrp2.width,
+            grpBoxBtnGrp2.width == grpBoxBtnGrp.width, 
             # Set the constraint height for the four window views
             grpBoxOverview.height == 320, 
+            grpBoxTop.height == grpBoxOverview.height,
             grpBoxSide.height == grpBoxOverview.height, 
-            grpBoxTop.height == grpBoxOverview.height, 
-            grpBoxList.height == grpBoxOverview.height, 
+            grpBoxTop.width == grpBoxSide.width,
 
             vbox(hbox(grpBoxTitle, grpBoxBtnGrp, grpBoxBtnGrp2), 
             vbox(
-                hbox(grpBoxMedian,grpBoxAvg),
+                #hbox(grpBoxMedian,grpBoxAvg),
+                hbox(grpBoxMedian),
             ),
             vbox(
-                hbox(grpBoxOverview,grpBoxSide),
-                hbox(grpBoxTop,grpBoxList),
+                hbox(grpBoxTop,grpBoxSide),
+                hbox(grpBoxOverview),
             ), 
-            hbox(btmGrpBoxBtnGrp, btmGrpBoxBtnGrp2)
             ), 
         ]
         GroupBox: grpBoxTitle:
@@ -95,40 +98,24 @@ enamldef Main(Window):
 
         GroupBox: grpBoxMedian:
             Label: appMedian: 
-                text = 'Annotated Object Central Median: ' + str(centorid)
-        
-        GroupBox: grpBoxAvg:
-            Label: appAvg: 
-                text = 'Annotated Object Central Average: ' + str(median)
-
-        GroupBox: grpBoxOverview:
-            title << "360 View" 
-            VTKCanvas:
-                renderer = renderers[0]
+                text = 'Annotated Object Centroid: ' + str(renderers[0].GetActiveCamera().GetPosition())
+    
         GroupBox: grpBoxSide:
             title << "Side View" 
             VTKCanvas:
                 renderer = renderers[1]
+        GroupBox: grpBoxOverview:
+            title << "360 View" 
+            VTKCanvas:
+                renderer = renderers[0]
         GroupBox: grpBoxTop:
             title << "Top View" 
             VTKCanvas:
                 renderer = renderers[2]
-        GroupBox: grpBoxList:
-            title << "Object List" 
+        #GroupBox: grpBoxList:
+            #title << "Object List" 
             
 
-        GroupBox: btmGrpBoxBtnGrp:
-            PushButton: previous:
-                text << 'Previous Object'
-                clicked :: 
-                    if fileNumSelection >= 1 and fileNumSelection < numOfFiles-1:
-                        fileNumSelection = fileNumSelection - 1
-        GroupBox: btmGrpBoxBtnGrp2:
-            PushButton: next:
-                text << 'Next Object'
-                clicked ::
-                    if fileNumSelection > 0 and fileNumSelection <= numOfFiles-2:
-                        fileNumSelection = fileNumSelection + 1
 
 
         
