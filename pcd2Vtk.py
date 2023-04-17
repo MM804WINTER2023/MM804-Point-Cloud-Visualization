@@ -20,6 +20,7 @@ def vtkPCDLoader(path, model_Num, itemName):
     clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH', 'ANC']
     d=[] # List that used to contain the path of the pcd object 
     clouds_object = [] # List that used to contain the pcd object 
+    # Create two empty lists for source objects
     sourceObjects = list()
     sourceObjects2 = list()
     # Traverse through the directory tree rooted at `path`
@@ -66,6 +67,7 @@ def vtkPCDLoader(path, model_Num, itemName):
 
     # Set the background color.
     colors.SetColor('BkgColor', [255, 255, 255, 255])
+    # this code sets it to white with RGBA values [255, 255, 255, 255] (fully opaque)
     renderers = list()
     mappers = list()
     actors = list()
@@ -82,10 +84,6 @@ def vtkPCDLoader(path, model_Num, itemName):
     backProperty.SetColor(colors.GetColor3d('Tomato'))
     targetObjects = sourceObjects[model_Num]
     targetObjects2 = sourceObjects2[model_Num]
-
-    def SelectPolygons(widget, event_string):
-        boxRep.GetPlanes(planes)
-        selectActor.VisibilityOn()
 
     # Create a source, renderer, mapper, and actor
     # for each object.
@@ -123,10 +121,11 @@ def vtkPCDLoader(path, model_Num, itemName):
     for index in range(0, windowNum):
         renderers[index].AddActor(actors[index])
         renderers[index].AddActor(textactors[index])
+        # Set the background color of the renderer to white and reset the camera
         renderers[index].SetBackground(colors.GetColor3d('White'))
         renderers[index].ResetCamera()
 
-
+        # Set camera position and orientation for each renderer
         if index == 0:
             renderers[index].GetActiveCamera().Azimuth(60)# Vertical
             renderers[index].GetActiveCamera().Elevation(100) # Vertical
@@ -135,7 +134,7 @@ def vtkPCDLoader(path, model_Num, itemName):
             print("Camera position:", position)
         elif index == 1:
             renderers[index].GetActiveCamera().Azimuth(180) # FLAT
-            renderers[index].GetActiveCamera().Elevation(100)
+            renderers[index].GetActiveCamera().Elevation(100) # FLAT
             renderers[index].GetActiveCamera().Zoom(1.2)
         elif index == 2:
             renderers[index].GetActiveCamera().Azimuth(-180) # 60 angle view
