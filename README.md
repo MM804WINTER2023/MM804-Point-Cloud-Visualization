@@ -11,6 +11,11 @@
 conda install enaml -c conda-forge
 ```
 
+### Install VTK
+``` 
+pip install vtk
+```
+
 ## Run the Project 
 ```Python3
 python3 MM804_Point_Cloud_Vis_Project.py
