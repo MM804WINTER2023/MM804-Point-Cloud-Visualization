@@ -70,6 +70,7 @@ data_model = TableModel(files=
 # To the mainDashboard
 def open_new_window(newPath, itemNewNames):
     global inputPath, itemNames
+    # Update the Variables
     inputPath = newPath
     itemNames = itemNewNames
     with enaml.imports():
