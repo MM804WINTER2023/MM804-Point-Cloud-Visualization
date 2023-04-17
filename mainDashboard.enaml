@@ -7,25 +7,36 @@ from enaml.widgets.api import (
 import os
 import sys
 from table_view import inputPath, itemNames
+import shutil
 
 
-from vtkDraft import vtkPCDLoader
+from pcd2Vtk import vtkPCDLoader
 
 import vtk
 
-from boxWidget import testBox
-
+# Taking the incoming path variable and store it as a global variable 
 path=inputPath
-
-
+# The code will select the first .pcd file in the directory and loaded in the PCDLoader
 fileNumSelection = 0
-centorid = (0, 0, 0)
-median = (0, 0, 0)
-
-renderers, new_path, numOfFiles = vtkPCDLoader(path, fileNumSelection, itemNames)
 
 
+renderers, new_path = vtkPCDLoader(path, fileNumSelection, itemNames)
 
+def discardObj (file_name, path):
+    # Set the file name and the path to the discard folder
+    discard_folder = './discard'
+
+    # Create the discard folder if it doesn't already exist
+    if not os.path.exists(discard_folder):
+        os.makedirs(discard_folder)
+
+    # Set the paths to the original file and the copy in the discard folder
+    original_path = new_path
+    discard_path = discard_folder + '/' + file_name + "_discard.pcd"
+
+    # Copy the file to the discard folder
+    shutil.copy2(original_path, discard_path)
+# Pop menu for information buttion onClick Event
 enamldef PopupMenu(Menu):
     GroupBox: grpBoxInformation:
         GroupBox: grpBoxRotateInstrution:
@@ -42,16 +53,17 @@ enamldef PopupMenu(Menu):
             Label:
                 text = 'Please use Mouse Roller to Zoom in/ out'
                 align = 'center'
-
-enamldef SettingMenu(Menu):
+# Define the onClick event of discard button being clicked 
+enamldef DiscardMenu(Menu):
     GroupBox: grpBoxInformation:
         GroupBox: grpBoxRotateInstrution:
             Label:
-                text = 'Auto-Rotate the Object?'
+                text = 'If you discard the current object, it will be copied and store in /discard folder'
                 align = 'left'
-            CheckBox:
-                text = 'Check for Auto-Rotation'
-                clicked :: print('Check One clicked')
+            PushButton: settings:
+                text << 'Confirm to Discard the current object'
+                clicked :: discardObj(itemNames, path)
+            
                 
 
 enamldef Main(Window):
@@ -63,10 +75,8 @@ enamldef Main(Window):
             # Set the constraint width for the four window views
             grpBoxTitle.width == 900,
             grpBoxTop.width == 0.488 * width,
-            #grpBoxMedian.width == grpBoxAvg.width,
             grpBoxBtnGrp.height == grpBoxTitle.height,
             grpBoxBtnGrp2.width == grpBoxBtnGrp.width, 
-            # Set the constraint height for the four window views
             grpBoxOverview.height == 320, 
             grpBoxTop.height == grpBoxOverview.height,
             grpBoxSide.height == grpBoxOverview.height, 
@@ -74,7 +84,6 @@ enamldef Main(Window):
 
             vbox(hbox(grpBoxTitle, grpBoxBtnGrp, grpBoxBtnGrp2), 
             vbox(
-                #hbox(grpBoxMedian,grpBoxAvg),
                 hbox(grpBoxMedian),
             ),
             vbox(
@@ -91,15 +100,16 @@ enamldef Main(Window):
             PushButton: information:
                 text << 'Information'
                 clicked :: PopupMenu().popup()
+
         GroupBox: grpBoxBtnGrp2:
             PushButton: settings:
-                text << 'Settings'
-                clicked :: SettingMenu().popup()
+                text << 'Discard the current object'
+                clicked :: DiscardMenu().popup()
 
         GroupBox: grpBoxMedian:
             Label: appMedian: 
                 text = 'Annotated Object Centroid: ' + str(renderers[0].GetActiveCamera().GetPosition())
-    
+        # Using VTK Canvas for displaying VTK Objects in Enaml 
         GroupBox: grpBoxSide:
             title << "Side View" 
             VTKCanvas:
@@ -112,8 +122,6 @@ enamldef Main(Window):
             title << "Top View" 
             VTKCanvas:
                 renderer = renderers[2]
-        #GroupBox: grpBoxList:
-            #title << "Object List" 
             
 
 

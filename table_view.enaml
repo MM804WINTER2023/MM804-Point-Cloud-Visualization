@@ -27,6 +27,7 @@ count = 0
 inputPath = ""
 itemNames = ""
 
+# Define a class for PCD file with attributes: date, dateSet, file_path, and debug.
 class PcdFile(Atom):
     date = Str()
 
@@ -39,21 +40,22 @@ class PcdFile(Atom):
     def __repr__(self, *args, **kwargs):
         return "PcdFile(dateSet={p.dateSet},date={p.date})".format(p=self)
 
+# Define a function to read files from a default path in table view.
 def readFiles():
-    defaultPath = "./Dataset/assets/hydro.tel"
-    files = os.listdir(defaultPath)
-    #file_info = {}
+    defaultPath = "./Dataset/assets/hydro.tel" # Default path to read files from.
+    files = os.listdir(defaultPath) # Get a list of files in the default path.
     pcdList = []
-    global count
+    global count # A global counter variable for generating the table view row item. 
     for file in files:
         print (file)
         file_path = os.path.join(defaultPath, file)
         name = file
         date = os.path.getmtime(file_path)
         mod_time_str = datetime.datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-        #file_info[name] = mod_time_str
         newPcd = PcdFile(date = mod_time_str, dateSet = name, file_path = file_path)
-        pcdList.append (newPcd)
+        if (newPcd.dateSet == ".DS_Store"):
+            continue
+        pcdList.append (newPcd) # Add the PcdFile object to the list of PCD files.
         count += 1
         
     return pcdList
@@ -64,7 +66,8 @@ class TableModel(Atom):
 data_model = TableModel(files=
     readFiles()
 )
-
+# Define the onClick event for explore button, once click on explore button it will take the users
+# To the mainDashboard
 def open_new_window(newPath, itemNewNames):
     global inputPath, itemNames
     inputPath = newPath
@@ -85,15 +88,15 @@ enamldef TableStart(Window):
             text = "Welcome to VTK Point Cloud Viewer, Please choose your PCD object from List below"
             font = {'size': 24, 'weight': 'bold'}
             align =  'center'
-
+        # Create a TableView with horizontal headers, minimum size and items
         TableView: table:
             minimum_size = (800,420)
             horizontal_headers << ['Annotated Object','Dataset','Date','Explore Dataset']
             horizontal_stretch = True
             items << model.files
-
+            # Create a Looper to show rows and a TableViewRow
             Looper:
-                iterable << range(count)  # update to show 10 rows
+                iterable << range(count)  # update to show rows
                 TableViewRow:
                     row << table.visible_row+loop_index
                     attr pcdFile << table.items[self.row]
@@ -115,6 +118,8 @@ enamldef TableStart(Window):
                     TableViewItem:
                         text << pcdFile.date
                         selectable = False
+                    # Create a TableViewItem with a PushButton Explore. Button Event is defined in open_new_window
+                    # Passing the varibales that contains file path and file name to MainDashboard
                     TableViewItem:
                         PushButton:
                             text << 'Explore'

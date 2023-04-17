@@ -18,32 +18,21 @@ from vtkmodules.vtkRenderingCore import (
 
 def vtkPCDLoader(path, model_Num, itemName):
     clases=['PLY##', 'CL##', 'PV##', 'PLW##', 'PLXW##', 'PLSB##', 'LDN##', 'SVB', 'VLG', 'BOX', 'VLT', 'ACH', 'MT', 'LPS', 'POLHT', 'MHE', 'MHT', 'JB', 'ANC', 'POLHY', 'GPO', 'PWT', 'MHS', 'CBT', 'MHCB', 'STDP', 'FH', 'VHCL', 'COT', 'VLW', 'MHD', 'SBS', 'SZ', 'SGW', 'IRS', 'SI', 'SSS', 'SNP', 'SP', 'TR', 'PLXW2##', 'PLA##', 'PLBK##', 'HV', 'TLS', 'PWL', 'TREC', 'TRED', 'KSK', 'POLEL', 'MRS', 'PRS', 'PGZ', 'BUSH', 'ANC']
-
-    #path='/home/glugo/project/data/scenes/NW/objects/assets/'# ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]:
-    
-    #pcd = o3d.io.read_point_cloud("/home/glugo/project/data/scenes/MW/objects/assets/sto.san.water.misc/MHD/MHD156-MW.pcd")
-
-    d=[]
-    clouds_object = []
+    d=[] # List that used to contain the path of the pcd object 
+    clouds_object = [] # List that used to contain the pcd object 
     sourceObjects = list()
     sourceObjects2 = list()
+    # Traverse through the directory tree rooted at `path`
     for root, dirs, filenames in os.walk(path):
         for clouds in filenames:
             d.append(root+'/'+clouds)
             clouds_object.append(clouds)
     new_path = ""   
     for samples in d:
-        #for clasesss in ["VLG","ACH","CBT", "MHCB", "COT", "MHD", "VLT"]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
-        
         item = itemName
 
         for clasesss in [item]: #["FH","LPS", 'SI','SSS', 'SNP', 'BUSH', 'PWL', 'POLHT', 'BOX']:
-            print ("clasesss is: ", clasesss)
-            print ("#####")
             if clasesss in samples:
-                print ("#####")
-                print (clasesss)
-                print ("#####")
                 index = samples.find("MHE")
                 if index != -1:
                     # Slice the string from the "MHE" index to the end of the path
@@ -51,35 +40,32 @@ def vtkPCDLoader(path, model_Num, itemName):
                 else:
                     # "MHE" is not in the path, so keep the original path
                     new_path = samples
-
-                print (new_path)
-                
-                print(clasesss)
-                print('Processing')
+                # Read the point cloud data from the file using Open3D 
+                # and convert it to a numpy array
                 pcd = o3d.io.read_point_cloud(samples)
                 p = np.asarray(pcd.points)
+                # Create a new vtkPoints object and add each point in `p` to it
                 points = vtk.vtkPoints()
                 vertices = vtk.vtkCellArray()
                 for i in range(len(p)):
                     point_id = points.InsertNextPoint(p[i])
                     vertices.InsertNextCell(1)
-                    vertices.InsertCellPoint(point_id)   
+                    vertices.InsertCellPoint(point_id)  
+                # Create a new vtkPolyData object, set the points and vertices, 
+                # and add it to `sourceObjects` 
                 sourceObjects.append(vtk.vtkPolyData())
                 sourceObjects[-1].SetPoints(points)
                 sourceObjects[-1].SetVerts(vertices)
                 sourceObjects2.append(clasesss)
                 break
-            break
+            break # Break out of the loop if the class is not found in the file path
 
-    numOfFiles = len(sourceObjects)
-
+    # The Total windows number in app is 3 so as the renderers 
     windowNum = 3
-
-    # np.random.shuffle(sourceObjects)
     colors = vtk.vtkNamedColors()
 
     # Set the background color.
-    colors.SetColor('BkgColor', [0, 0, 0, 255])
+    colors.SetColor('BkgColor', [255, 255, 255, 255])
     renderers = list()
     mappers = list()
     actors = list()
@@ -114,32 +100,7 @@ def vtkPCDLoader(path, model_Num, itemName):
         actors[i].SetBackfaceProperty(backProperty)
         actors[i].GetProperty().SetPointSize(1.0)      
 
-        # # Bounding Box
-        # planes = vtk.vtkPlanes()
-        # clipper = vtk.vtkClipPolyData()
-        # clipper.SetClipFunction(planes)
-        # clipper.InsideOutOn()
-        # selectMapper = vtk.vtkPolyDataMapper()
-        # selectMapper.SetInputConnection(clipper.GetOutputPort())
-        # selectActor = vtk.vtkLODActor()
-        # selectActor.SetMapper(selectMapper)
-        # selectActor.GetProperty().SetColor(0, 1, 0)
-        # selectActor.VisibilityOff()
-        # selectActor.SetScale(1.01, 1.01, 1.01)
-
-        # boxRep = vtk.vtkBoxRepresentation()
-        # boxRep.SetPlaceFactor(0.75)
-        # # boxRep.PlaceWidget(sphere.GetOutput().GetBounds())
-        # boxWidget = vtk.vtkBoxWidget2()
-        # # boxWidget.SetInteractor(iRen)
-        # boxWidget.SetRepresentation(boxRep)
-        # boxWidget.AddObserver("EndInteractionEvent", SelectPolygons)
-        # boxWidget.SetPriority(1)
-        
-        #  # Bounding Box
-
         textmappers.append(vtk.vtkTextMapper())
-        #textmappers[i].SetInput(sourceObjects[i].GetClassName())
         textmappers[i].SetInput(targetObjects2)
         textmappers[i].SetTextProperty(textProperty)
 
@@ -158,29 +119,12 @@ def vtkPCDLoader(path, model_Num, itemName):
         renderers.append(vtk.vtkRenderer())
         
 
-    print (renderers)
-
 
     for index in range(0, windowNum):
         renderers[index].AddActor(actors[index])
         renderers[index].AddActor(textactors[index])
         renderers[index].SetBackground(colors.GetColor3d('White'))
         renderers[index].ResetCamera()
-
-        # # rough Bounding Box
-        # outline = vtk.vtkOutlineFilter()
-        # print("*******")
-        # print (type(targetObjects))
-        # outline.SetInputConnection(targetObjects.GetOutputPort())
-
-        # outlineMapper = vtkPolyDataMapper()
-        # outlineMapper.SetInputConnection(outline.GetOutputPort())
-
-        # outlineActor = vtkActor()
-        # outlineActor.SetMapper(outlineMapper)
-        # outlineActor.GetProperty().SetColor(0,1,1)
-
-        # renderers[index].AddActor(outlineActor)
 
 
         if index == 0:
@@ -200,5 +144,5 @@ def vtkPCDLoader(path, model_Num, itemName):
         renderers[index].ResetCameraClippingRange()
 
 
-    return renderers, new_path, numOfFiles
+    return renderers, new_path
 
